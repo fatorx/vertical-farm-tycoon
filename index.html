@@ -521,13 +521,15 @@
         class Renderer {
             constructor(canvas) {
                 this.canvas = canvas;
-                this.ctx = canvas.getContext('2d');
+                this.ctx = canvas ? canvas.getContext('2d') : null;
                 this.useDirtyFlagging = true;
                 this.renderedCount = 0;
             }
 
             render(allObjects) {
                 this.renderedCount = 0;
+
+                if (!this.ctx) return; // Verificação de segurança
 
                 if (this.useDirtyFlagging) {
                     const objectsToRender = allObjects.filter(obj => obj.isDirty);
