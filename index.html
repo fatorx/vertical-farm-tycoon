@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Farm Tycoon - Demo de Otimizações</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .canvas-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .canvas-wrapper {
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #f5f5dc;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-group {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .control-group h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #48bb78;
+        }
+
+        button.secondary:hover {
+            background: #38a169;
+        }
+
+        button.danger {
+            background: #f56565;
+        }
+
+        button.danger:hover {
+            background: #e53e3e;
+        }
+
+        .stats {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            line-height: 1.8;
+        }
+
+        .stats p {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .stats .label {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stats .value {
+            color: #764ba2;
+            font-weight: 700;
+        }
+
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .info-section {
+            background: #e6f7ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #0066cc;
+            margin-top: 20px;
+        }
+
+        .info-section h4 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+        .info-section p {
+            color: #333;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 0.9em;
+            background: #e0e0e0;
+            color: #333;
+            border: 2px solid transparent;
+        }
+
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .performance-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 20px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 Vertical Farm Tycoon</h1>
+            <p>Demonstração de Otimizações: Dirty Flagging + Off-screen Canvas</p>
+        </div>
+
+        <div class="content">
+            <div class="canvas-section">
+                <h2 style="color: #333; font-size: 1.3em;">Andar da Fazenda</h2>
+                <div class="canvas-wrapper">
+                    <canvas id="gameCanvas" width="800" height="600"></canvas>
+                </div>
+                <div class="info-section">
+                    <h4>💡 Como Usar:</h4>
+                    <p><strong>Clique no canvas</strong> para colher plantas maduras (estágio 4).</p>
+                    <p><strong>Use os botões</strong> para plantar, fazer manutenção e controlar a simulação.</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <h3>🎮 Controles</h3>
+                    <button class="secondary" onclick="plantRandomCrop()">🌿 Plantar Aleatório</button>
+                    <button class="secondary" onclick="plantCenoura()">🥕 Plantar Cenoura</button>
+                    <button class="secondary" onclick="plantBatata()">🥔 Plantar Batata</button>
+                    <button onclick="toggleSimulation()">⏸️ Pausar/Retomar</button>
+                    <button class="danger" onclick="resetFloor()">🔄 Resetar</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>🔧 Manutenção</h3>
+                    <button onclick="maintainIrrigation()">💧 Manter Irrigação</button>
+                    <button onclick="maintainAC()">❄️ Manter Ar Condicionado</button>
+                    <button onclick="maintainLighting()">💡 Manter Iluminação</button>
+                </div>
+
+                <div class="control-group">
+                    <h3>📊 Estatísticas</h3>
+                    <div class="stats">
+                        <p><span class="label">Dia de Jogo:</span> <span class="value" id="dayCounter">1</span></p>
+                        <p><span class="label">Plantas Ativas:</span> <span class="value" id="plantCount">0</span></p>
+                        <p><span class="label">Plantas Maduras:</span> <span class="value" id="matureCount">0</span></p>
+                        <p><span class="label">Plantas Renderizadas:</span> <span class="value" id="renderedCount">0</span></p>
+                    </div>
+
+                    <div class="performance-metrics">
+                        <div class="metric">
+                            <div class="metric-label">FPS</div>
+                            <div class="metric-value" id="fpsCounter">60</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Tempo Render (ms)</div>
+                            <div class="metric-value" id="renderTime">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>⚙️ Otimizações</h3>
+                    <div class="toggle-group">
+                        <button class="toggle-btn active" id="offscreenToggle" onclick="toggleOffscreenCanvas()">Off-screen Canvas</button>
+                        <button class="toggle-btn active" id="dirtyToggle" onclick="toggleDirtyFlagging()">Dirty Flagging</button>
+                    </div>
+                    <div class="stats">
+                        <p><span class="label">Status:</span></p>
+                        <p id="optimizationStatus">✅ Ambas as otimizações ativas</p>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>🎨 Legenda</h3>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #8B7355;"></div>
+                            <span>Semente</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #6A824C;"></div>
+                            <span>Brotação</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #5A7A3C;"></div>
+                            <span>Crescimento</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #4A6A2C;"></div>
+                            <span>Madura</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #3A5A1C;"></div>
+                            <span>Colheita</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #FF0000;"></div>
+                            <span>Doente</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Demonstração educacional - Vertical Farm Tycoon © 2024</p>
+            <p>Técnicas de otimização: Dirty Flagging + Off-screen Canvas</p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CLASSES E LÓGICA DO JOGO
+        // ============================================
+
+        // Classe Plant com Dirty Flagging
+        class Plant {
+            constructor(x, y, type, floorId) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.floorId = floorId;
+                
+                this.growthStage = 0;
+                this.health = 100;
+                this.waterLevel = 80;
+                this.daysWithoutWater = 0;
+                
+                this.color = '#8B7355';
+                this.size = 20;
+                
+                this.isDirty = true;
+            }
+
+            grow() {
+                if (this.growthStage < 4) {
+                    this.growthStage++;
+                    this.updateVisuals();
+                    this.isDirty = true;
+                }
+            }
+
+            consumeWater() {
+                this.waterLevel -= 10;
+                if (this.waterLevel <= 0) {
+                    this.daysWithoutWater++;
+                    this.health -= 15;
+                    this.isDirty = true;
+                }
+                this.isDirty = true;
+            }
+
+            water() {
+                this.waterLevel = 100;
+                this.daysWithoutWater = 0;
+                this.isDirty = true;
+            }
+
+            updateVisuals() {
+                const stages = [
+                    { color: '#8B7355', size: 15 },
+                    { color: '#6A824C', size: 20 },
+                    { color: '#5A7A3C', size: 25 },
+                    { color: '#4A6A2C', size: 30 },
+                    { color: '#3A5A1C', size: 35 }
+                ];
+
+                const stage = stages[this.growthStage];
+                this.color = stage.color;
+                this.size = stage.size;
+            }
+
+            draw(context) {
+                context.fillStyle = this.color;
+                context.fillRect(this.x, this.y, this.size, this.size);
+
+                if (this.health < 100) {
+                    context.fillStyle = '#FF0000';
+                    context.fillRect(this.x, this.y - 5, this.size, 3);
+                    
+                    context.fillStyle = '#00FF00';
+                    context.fillRect(this.x, this.y - 5, (this.size * this.health) / 100, 3);
+                }
+
+                if (this.waterLevel < 30) {
+                    context.fillStyle = '#0099FF';
+                    context.fillRect(this.x + this.size + 2, this.y, 4, 4);
+                }
+            }
+        }
+
+        // Classe BackgroundRenderer com Off-screen Canvas
+        class BackgroundRenderer {
+            constructor(width, height) {
+                this.offscreenCanvas = document.createElement('canvas');
+                this.offscreenCanvas.width = width;
+                this.offscreenCanvas.height = height;
+                this.ctx = this.offscreenCanvas.getContext('2d');
+                
+                this.width = width;
+                this.height = height;
+                this.cellSize = 40;
+                this.useOffscreen = true;
+            }
+
+            preRender() {
+                this.ctx.fillStyle = '#F5F5DC';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+
+                this.drawGrid();
+                this.drawBorders();
+            }
+
+            drawGrid() {
+                this.ctx.strokeStyle = '#D3D3D3';
+                this.ctx.lineWidth = 1;
+
+                for (let x = 0; x <= this.width; x += this.cellSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, this.height);
+                    this.ctx.stroke();
+                }
+
+                for (let y = 0; y <= this.height; y += this.cellSize) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(this.width, y);
+                    this.ctx.stroke();
+                }
+            }
+
+            drawBorders() {
+                this.ctx.strokeStyle = '#8B4513';
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeRect(0, 0, this.width, this.height);
+            }
+
+            render(mainCanvas, mainCtx) {
+                if (this.useOffscreen) {
+                    mainCtx.drawImage(this.offscreenCanvas, 0, 0);
+                } else {
+                    mainCtx.fillStyle = '#F5F5DC';
+                    mainCtx.fillRect(0, 0, this.width, this.height);
+                    this.drawGrid();
+                    this.drawBorders();
+                }
+            }
+        }
+
+        // Classe Renderer com Dirty Flagging
+        class Renderer {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.useDirtyFlagging = true;
+                this.renderedCount = 0;
+            }
+
+            render(allObjects) {
+                this.renderedCount = 0;
+
+                if (this.useDirtyFlagging) {
+                    const objectsToRender = allObjects.filter(obj => obj.isDirty);
+
+                    if (objectsToRender.length === 0) {
+                        return;
+                    }
+
+                    for (const obj of objectsToRender) {
+                        this.ctx.clearRect(obj.x - 5, obj.y - 10, obj.size + 10, obj.size + 15);
+                    }
+
+                    for (const obj of objectsToRender) {
+                        obj.draw(this.ctx);
+                        obj.isDirty = false;
+                        this.renderedCount++;
+                    }
+                } else {
+                    for (const obj of allObjects) {
+                        obj.draw(this.ctx);
+                        this.renderedCount++;
+                    }
+                }
+            }
+        }
+
+        // Classe Floor
+        class Floor {
+            constructor(id, type, width = 800, height = 600) {
+                this.id = id;
+                this.type = type;
+                this.width = width;
+                this.height = height;
+                this.cellSize = 40;
+
+                this.gridWidth = Math.floor(width / this.cellSize);
+                this.gridHeight = Math.floor(height / this.cellSize);
+                this.plants = Array(this.gridWidth * this.gridHeight).fill(null);
+
+                this.backgroundRenderer = new BackgroundRenderer(width, height);
+                this.backgroundRenderer.preRender();
+
+                this.renderer = new Renderer(null);
+
+                this.equipment = {
+                    irrigation: { status: 'functional', durability: 100 },
+                    ac: { status: 'functional', durability: 100 },
+                    lighting: { status: 'functional', durability: 100 }
+                };
+            }
+
+            plant(gridX, gridY, type) {
+                if (gridX < 0 || gridX >= this.gridWidth || gridY < 0 || gridY >= this.gridHeight) {
+                    return false;
+                }
+
+                const index = gridY * this.gridWidth + gridX;
+                if (this.plants[index] === null) {
+                    const x = gridX * this.cellSize + 5;
+                    const y = gridY * this.cellSize + 5;
+                    const plant = new Plant(x, y, type, this.id);
+                    this.plants[index] = plant;
+                    return true;
+                }
+                return false;
+            }
+
+            harvest(gridX, gridY) {
+                if (gridX < 0 || gridX >= this.gridWidth || gridY < 0 || gridY >= this.gridHeight) {
+                    return null;
+                }
+
+                const index = gridY * this.gridWidth + gridX;
+                const plant = this.plants[index];
+                if (plant && plant.growthStage === 4) {
+                    this.plants[index] = null;
+                    return plant;
+                }
+                return null;
+            }
+
+            update() {
+                for (const plant of this.plants) {
+                    if (plant) {
+                        plant.consumeWater();
+                        
+                        if (this.equipment.irrigation.status === 'functional') {
+                            plant.water();
+                        }
+
+                        if (this.equipment.lighting.status === 'functional') {
+                            plant.grow();
+                        }
+                    }
+                }
+
+                this.updateEquipment();
+            }
+
+            updateEquipment() {
+                for (const key in this.equipment) {
+                    const eq = this.equipment[key];
+                    eq.durability -= Math.random() * 2;
+
+                    if (eq.durability <= 0) {
+                        eq.status = 'broken';
+                    } else if (eq.durability <= 30) {
+                        eq.status = 'damaged';
+                    } else {
+                        eq.status = 'functional';
+                    }
+                }
+            }
+
+            maintainEquipment(equipmentName) {
+                if (this.equipment[equipmentName]) {
+                    this.equipment[equipmentName].durability = 100;
+                    this.equipment[equipmentName].status = 'functional';
+                }
+            }
+
+            render(canvas, ctx) {
+                this.backgroundRenderer.render(canvas, ctx);
+
+                this.renderer.canvas = canvas;
+                const activePlants = this.plants.filter(p => p !== null);
+                this.renderer.render(activePlants);
+
+                this.drawEquipmentStatus(ctx);
+            }
+
+            drawEquipmentStatus(ctx) {
+                const equipmentIcons = [
+                    { name: 'irrigation', x: 10, y: 10, icon: '💧' },
+                    { name: 'ac', x: 60, y: 10, icon: '❄️' },
+                    { name: 'lighting', x: 110, y: 10, icon: '💡' }
+                ];
+
+                for (const eq of equipmentIcons) {
+                    const equipment = this.equipment[eq.name];
+                    const color = equipment.status === 'functional' ? '#00FF00' : 
+                                 equipment.status === 'damaged' ? '#FFFF00' : '#FF0000';
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(eq.x, eq.y, 30, 30);
+                    ctx.fillStyle = '#000000';
+                    ctx.font = '20px Arial';
+                    ctx.fillText(eq.icon, eq.x + 5, eq.y + 22);
+                }
+            }
+
+            getStats() {
+                const activePlants = this.plants.filter(p => p !== null);
+                const maturePlants = activePlants.filter(p => p.growthStage === 4);
+                return {
+                    totalPlants: activePlants.length,
+                    maturePlants: maturePlants.length,
+                    renderedCount: this.renderer.renderedCount
+                };
+            }
+        }
+
+        // ============================================
+        // VARIÁVEIS GLOBAIS
+        // ============================================
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const floor = new Floor(1, 'Raízes', 800, 600);
+
+        let gameDay = 1;
+        let frameCount = 0;
+        const framesPerGameDay = 60;
+        let isSimulationRunning = true;
+
+        let fpsCounter = 0;
+        let fpsUpdateTime = 0;
+        let lastFrameTime = performance.now();
+        let renderTime = 0;
+
+        // ============================================
+        // LOOP PRINCIPAL
+        // ============================================
+
+        function gameLoop() {
+            const frameStartTime = performance.now();
+
+            if (isSimulationRunning) {
+                frameCount++;
+
+                if (frameCount >= framesPerGameDay) {
+                    frameCount = 0;
+                    gameDay++;
+                    floor.update();
+                    updateUI();
+                }
+            }
+
+            floor.render(canvas, ctx);
+
+            // Desenhar informações de debug
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText(`Dia: ${gameDay}`, 10, canvas.height - 10);
+
+            // Calcular FPS
+            const now = performance.now();
+            const deltaTime = now - lastFrameTime;
+            lastFrameTime = now;
+
+            fpsCounter++;
+            fpsUpdateTime += deltaTime;
+
+            if (fpsUpdateTime >= 1000) {
+                document.getElementById('fpsCounter').textContent = fpsCounter;
+                fpsCounter = 0;
+                fpsUpdateTime = 0;
+            }
+
+            renderTime = performance.now() - frameStartTime;
+            document.getElementById('renderTime').textContent = renderTime.toFixed(2);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ============================================
+        // FUNÇÕES DE CONTROLE
+        // ============================================
+
+        function plantRandomCrop() {
+            const types = ['Cenoura', 'Batata', 'Beterraba'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            const gridX = Math.floor(Math.random() * floor.gridWidth);
+            const gridY = Math.floor(Math.random() * floor.gridHeight);
+            floor.plant(gridX, gridY, type);
+            updateUI();
+        }
+
+        function plantCenoura() {
+            const gridX = Math.floor(Math.random() * floor.gridWidth);
+            const gridY = Math.floor(Math.random() * floor.gridHeight);
+            floor.plant(gridX, gridY, 'Cenoura');
+            updateUI();
+        }
+
+        function plantBatata() {
+            const gridX = Math.floor(Math.random() * floor.gridWidth);
+            const gridY = Math.floor(Math.random() * floor.gridHeight);
+            floor.plant(gridX, gridY, 'Batata');
+            updateUI();
+        }
+
+        function toggleSimulation() {
+            isSimulationRunning = !isSimulationRunning;
+        }
+
+        function resetFloor() {
+            floor.plants = Array(floor.gridWidth * floor.gridHeight).fill(null);
+            gameDay = 1;
+            frameCount = 0;
+            updateUI();
+        }
+
+        function maintainIrrigation() {
+            floor.maintainEquipment('irrigation');
+        }
+
+        function maintainAC() {
+            floor.maintainEquipment('ac');
+        }
+
+        function maintainLighting() {
+            floor.maintainEquipment('lighting');
+        }
+
+        function toggleOffscreenCanvas() {
+            floor.backgroundRenderer.useOffscreen = !floor.backgroundRenderer.useOffscreen;
+            document.getElementById('offscreenToggle').classList.toggle('active');
+            updateOptimizationStatus();
+        }
+
+        function toggleDirtyFlagging() {
+            floor.renderer.useDirtyFlagging = !floor.renderer.useDirtyFlagging;
+            document.getElementById('dirtyToggle').classList.toggle('active');
+            updateOptimizationStatus();
+        }
+
+        function updateOptimizationStatus() {
+            const offscreen = floor.backgroundRenderer.useOffscreen;
+            const dirty = floor.renderer.useDirtyFlagging;
+
+            let status = '';
+            if (offscreen && dirty) {
+                status = '✅ Ambas as otimizações ativas';
+            } else if (offscreen) {
+                status = '⚠️ Apenas Off-screen Canvas ativo';
+            } else if (dirty) {
+                status = '⚠️ Apenas Dirty Flagging ativo';
+            } else {
+                status = '❌ Nenhuma otimização ativa';
+            }
+
+            document.getElementById('optimizationStatus').textContent = status;
+        }
+
+        function updateUI() {
+            const stats = floor.getStats();
+            document.getElementById('dayCounter').textContent = gameDay;
+            document.getElementById('plantCount').textContent = stats.totalPlants;
+            document.getElementById('matureCount').textContent = stats.maturePlants;
+            document.getElementById('renderedCount').textContent = stats.renderedCount;
+        }
+
+        // Interação com clique no canvas
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+
+            const gridX = Math.floor(clickX / floor.cellSize);
+            const gridY = Math.floor(clickY / floor.cellSize);
+
+            const harvested = floor.harvest(gridX, gridY);
+            if (harvested) {
+                console.log(`Colhida: ${harvested.type}`);
+            }
+            updateUI();
+        });
+
+        // Iniciar o jogo
+        gameLoop();
+        updateUI();
+    </script>
+</body>
+</html>
