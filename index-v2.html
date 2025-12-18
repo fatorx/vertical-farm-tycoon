@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Farm Tycoon v2 - Interface Melhorada</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .header-stat {
+            text-align: center;
+        }
+
+        .header-stat-label {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .header-stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 450px;
+            gap: 0;
+            height: calc(100vh - 150px);
+            min-height: 600px;
+        }
+
+        .game-area {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8f9fa;
+        }
+
+        .canvas-title {
+            font-size: 1.3em;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .canvas-wrapper {
+            flex: 1;
+            background: #f5f5dc;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            display: flex;
+            gap: 15px;
+        }
+
+        .sidebar {
+            background: white;
+            border-left: 3px solid #e9ecef;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .control-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .control-section h3 {
+            color: #333;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-section.planting {
+            border-left-color: #28a745;
+        }
+
+        .control-section.maintenance {
+            border-left-color: #007bff;
+        }
+
+        .control-section.speed {
+            border-left-color: #9900ff;
+        }
+
+        .control-section.stats {
+            border-left-color: #ff6600;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .button-grid.single {
+            grid-template-columns: 1fr;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-plant {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-plant:hover:not(:disabled) {
+            background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+        }
+
+        .btn-maintenance {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+        }
+
+        .btn-maintenance:hover:not(:disabled) {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+        }
+
+        .btn-speed {
+            background: linear-gradient(135deg, #9900ff 0%, #7700cc 100%);
+            color: white;
+        }
+
+        .btn-speed:hover:not(:disabled) {
+            background: linear-gradient(135deg, #7700cc 0%, #5500aa 100%);
+        }
+
+        .btn-speed.active {
+            background: linear-gradient(135deg, #ff6600 0%, #cc5200 100%);
+            box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.3);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn-reset:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+        }
+
+        .toast {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid #28a745;
+            animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .toast.warning {
+            border-left-color: #ffc107;
+        }
+
+        .toast-icon {
+            font-size: 1.5em;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        .help-text {
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .help-text strong {
+            color: #0066cc;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .sidebar {
+                border-left: none;
+                border-top: 3px solid #e9ecef;
+            }
+
+            .header-right {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .settings-toggle {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .settings-btn {
+            background: #6c757d;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        .settings-panel {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            display: none;
+            z-index: 999;
+            min-width: 300px;
+        }
+
+        .settings-panel.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: #28a745;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>🌱 Vertical Farm Tycoon</h1>
+                <p>Versão 2.0 - Interface Melhorada</p>
+            </div>
+            <div class="header-right">
+                <div class="header-stat">
+                    <div class="header-stat-label">Dia do Jogo</div>
+                    <div class="header-stat-value" id="headerDay">1</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-label">Dinheiro</div>
+                    <div class="header-stat-value" id="headerMoney">$500</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Game Area -->
+            <div class="game-area">
+                <div class="canvas-title">Andar da Fazenda</div>
+                <div class="canvas-wrapper">
+                    <canvas id="gameCanvas" width="800" height="600"></canvas>
+                    <div class="canvas-overlay">
+                        <span>FPS: <strong id="fpsDisplay">60</strong></span>
+                        <span>Render: <strong id="renderDisplay">0.0ms</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="help-text">
+                    <strong>💡 Como Jogar:</strong><br>
+                    Clique no canvas para colher plantas maduras (🟩). Use os controles de velocidade para gerenciar o tempo do jogo.
+                </div>
+
+                <!-- Planting Controls -->
+                <div class="control-section planting">
+                    <h3>🌿 Plantio</h3>
+                    <div class="button-grid">
+                        <button class="btn-plant" onclick="plantCrop('cenoura')">🥕 Cenoura</button>
+                        <button class="btn-plant" onclick="plantCrop('batata')">🥔 Batata</button>
+                    </div>
+                </div>
+
+                <!-- Speed Controls -->
+                <div class="control-section speed">
+                    <h3>⏯️ Velocidade do Jogo</h3>
+                    <div class="button-grid">
+                        <button class="btn-speed" id="pauseBtn" onclick="setGameSpeed(0)">⏸️ Pausar</button>
+                        <button class="btn-speed active" id="speed1Btn" onclick="setGameSpeed(1)">▶️ 1x</button>
+                        <button class="btn-speed" id="speed2Btn" onclick="setGameSpeed(2)">⏩ 2x</button>
+                        <button class="btn-speed" id="speed4Btn" onclick="setGameSpeed(4)">⏭️ 4x</button>
+                    </div>
+                </div>
+
+                <!-- Maintenance Controls -->
+                <div class="control-section maintenance">
+                    <h3>🔧 Manutenção</h3>
+                    <div class="button-grid">
+                        <button class="btn-maintenance" onclick="maintain('irrigation')">💧 Irrigação</button>
+                        <button class="btn-maintenance" onclick="maintain('ac')">❄️ Ar Cond.</button>
+                        <button class="btn-maintenance" onclick="maintain('lighting')">💡 Iluminação</button>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="control-section stats">
+                    <h3>📊 Estatísticas</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Plantas Ativas</div>
+                            <div class="stat-value" id="plantCount">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Plantas Maduras</div>
+                            <div class="stat-value" id="matureCount">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Irrigação</div>
+                            <div class="stat-value" id="irrigationStatus">❌</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Ar Condicionado</div>
+                            <div class="stat-value" id="acStatus">❌</div>
+                        </div>
+                    </div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #8B4513"></div>
+                            <span>Semente</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #90EE90"></div>
+                            <span>Brotação</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #32CD32"></div>
+                            <span>Crescimento</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #228B22"></div>
+                            <span>Madura</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reset -->
+                <div class="button-grid single">
+                    <button class="btn-reset" onclick="resetGame()">🔄 Resetar Jogo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Settings Toggle -->
+    <div class="settings-toggle">
+        <button class="settings-btn" onclick="toggleSettings()">⚙️ Opções</button>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <h3 style="margin-bottom: 15px;">Otimizações</h3>
+        <div class="settings-item">
+            <span>Off-screen Canvas</span>
+            <div class="toggle-switch active" id="offscreenToggle" onclick="toggleOffscreen()">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+        <div class="settings-item">
+            <span>Dirty Flagging</span>
+            <div class="toggle-switch active" id="dirtyToggle" onclick="toggleDirty()">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            day: 1,
+            money: 500,
+            plants: [],
+            gameSpeed: 1,
+            isPaused: false,
+            irrigation: false,
+            ac: false,
+            lighting: false,
+            offscreenCanvas: true,
+            dirtyFlagging: true
+        };
+
+        // Canvas Setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const GRID_SIZE = 20;
+        const CELL_SIZE = canvas.width / GRID_SIZE;
+
+        // Plant Class
+        class Plant {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.stage = 0; // 0: seed, 1: sprout, 2: growing, 3: mature
+                this.age = 0;
+                this.isDirty = true;
+            }
+
+            grow() {
+                this.age++;
+                const growthRate = this.type === 'cenoura' ? 10 : 15;
+                if (this.age % growthRate === 0 && this.stage < 3) {
+                    this.stage++;
+                    this.isDirty = true;
+                }
+            }
+
+            getColor() {
+                const colors = ['#8B4513', '#90EE90', '#32CD32', '#228B22'];
+                return colors[this.stage];
+            }
+
+            render(ctx) {
+                if (!gameState.dirtyFlagging || this.isDirty) {
+                    ctx.fillStyle = this.getColor();
+                    ctx.fillRect(
+                        this.x * CELL_SIZE + 2,
+                        this.y * CELL_SIZE + 2,
+                        CELL_SIZE - 4,
+                        CELL_SIZE - 4
+                    );
+                    this.isDirty = false;
+                }
+            }
+        }
+
+        // Background Renderer
+        let backgroundCanvas = null;
+        function renderBackground() {
+            if (!gameState.offscreenCanvas) return;
+            
+            if (!backgroundCanvas) {
+                backgroundCanvas = document.createElement('canvas');
+                backgroundCanvas.width = canvas.width;
+                backgroundCanvas.height = canvas.height;
+                const bgCtx = backgroundCanvas.getContext('2d');
+                
+                // Draw grid
+                bgCtx.fillStyle = '#f5f5dc';
+                bgCtx.fillRect(0, 0, canvas.width, canvas.height);
+                bgCtx.strokeStyle = '#ddd';
+                bgCtx.lineWidth = 1;
+                
+                for (let i = 0; i <= GRID_SIZE; i++) {
+                    bgCtx.beginPath();
+                    bgCtx.moveTo(i * CELL_SIZE, 0);
+                    bgCtx.lineTo(i * CELL_SIZE, canvas.height);
+                    bgCtx.stroke();
+                    
+                    bgCtx.beginPath();
+                    bgCtx.moveTo(0, i * CELL_SIZE);
+                    bgCtx.lineTo(canvas.width, i * CELL_SIZE);
+                    bgCtx.stroke();
+                }
+            }
+            
+            ctx.drawImage(backgroundCanvas, 0, 0);
+        }
+
+        // Game Functions
+        function plantCrop(type) {
+            if (gameState.plants.length >= GRID_SIZE * GRID_SIZE) {
+                showToast('❌ Fazenda cheia!', 'error');
+                return;
+            }
+
+            const cost = type === 'cenoura' ? 20 : 30;
+            if (gameState.money < cost) {
+                showToast('❌ Dinheiro insuficiente!', 'error');
+                return;
+            }
+
+            // Find empty spot
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * GRID_SIZE);
+                y = Math.floor(Math.random() * GRID_SIZE);
+            } while (gameState.plants.some(p => p.x === x && p.y === y));
+
+            gameState.plants.push(new Plant(x, y, type));
+            gameState.money -= cost;
+            updateUI();
+            showToast(`🌱 ${type === 'cenoura' ? 'Cenoura' : 'Batata'} plantada!`);
+        }
+
+        function setGameSpeed(speed) {
+            gameState.gameSpeed = speed;
+            gameState.isPaused = speed === 0;
+            
+            // Update button states
+            document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
+            if (speed === 0) document.getElementById('pauseBtn').classList.add('active');
+            else if (speed === 1) document.getElementById('speed1Btn').classList.add('active');
+            else if (speed === 2) document.getElementById('speed2Btn').classList.add('active');
+            else if (speed === 4) document.getElementById('speed4Btn').classList.add('active');
+            
+            const speedText = speed === 0 ? 'Pausado' : `${speed}x`;
+            showToast(`⏯️ Velocidade: ${speedText}`);
+        }
+
+        function maintain(type) {
+            const cost = 50;
+            if (gameState.money < cost) {
+                showToast('❌ Dinheiro insuficiente!', 'error');
+                return;
+            }
+
+            gameState[type] = true;
+            gameState.money -= cost;
+            updateUI();
+            
+            const names = {
+                irrigation: 'Irrigação',
+                ac: 'Ar Condicionado',
+                lighting: 'Iluminação'
+            };
+            showToast(`🔧 ${names[type]} mantida!`);
+            
+            setTimeout(() => {
+                gameState[type] = false;
+                updateUI();
+                showToast(`⚠️ ${names[type]} precisa de manutenção!`, 'warning');
+            }, 30000); // 30 seconds
+        }
+
+        function resetGame() {
+            if (confirm('Tem certeza que deseja resetar o jogo?')) {
+                gameState.day = 1;
+                gameState.money = 500;
+                gameState.plants = [];
+                gameState.gameSpeed = 1;
+                gameState.irrigation = false;
+                gameState.ac = false;
+                gameState.lighting = false;
+                backgroundCanvas = null;
+                updateUI();
+                showToast('🔄 Jogo resetado!');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = { success: '✅', error: '❌', warning: '⚠️' };
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type] || '✅'}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function updateUI() {
+            document.getElementById('headerDay').textContent = gameState.day;
+            document.getElementById('headerMoney').textContent = `$${gameState.money}`;
+            document.getElementById('plantCount').textContent = gameState.plants.length;
+            document.getElementById('matureCount').textContent = 
+                gameState.plants.filter(p => p.stage === 3).length;
+            document.getElementById('irrigationStatus').textContent = gameState.irrigation ? '✅' : '❌';
+            document.getElementById('acStatus').textContent = gameState.ac ? '✅' : '❌';
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('show');
+        }
+
+        function toggleOffscreen() {
+            gameState.offscreenCanvas = !gameState.offscreenCanvas;
+            document.getElementById('offscreenToggle').classList.toggle('active');
+            if (!gameState.offscreenCanvas) backgroundCanvas = null;
+        }
+
+        function toggleDirty() {
+            gameState.dirtyFlagging = !gameState.dirtyFlagging;
+            document.getElementById('dirtyToggle').classList.toggle('active');
+            gameState.plants.forEach(p => p.isDirty = true);
+        }
+
+        // Canvas Click Handler
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const x = Math.floor((e.clientX - rect.left) * scaleX / CELL_SIZE);
+            const y = Math.floor((e.clientY - rect.top) * scaleY / CELL_SIZE);
+            
+            const plantIndex = gameState.plants.findIndex(p => p.x === x && p.y === y);
+            if (plantIndex !== -1) {
+                const plant = gameState.plants[plantIndex];
+                if (plant.stage === 3) {
+                    gameState.plants.splice(plantIndex, 1);
+                    gameState.money += 100;
+                    updateUI();
+                    showToast('🌾 Planta colhida! +$100');
+                } else {
+                    showToast('⚠️ Planta ainda não está madura!', 'warning');
+                }
+            }
+        });
+
+        // Game Loop
+        let lastTime = 0;
+        let dayCounter = 0;
+        let fpsCounter = 0;
+        let fpsTime = 0;
+        let currentFps = 60;
+
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            // FPS calculation
+            fpsCounter++;
+            fpsTime += deltaTime;
+            if (fpsTime >= 1000) {
+                currentFps = fpsCounter;
+                fpsCounter = 0;
+                fpsTime = 0;
+                document.getElementById('fpsDisplay').textContent = currentFps;
+            }
+            
+            // Game logic
+            if (!gameState.isPaused) {
+                dayCounter += deltaTime * gameState.gameSpeed;
+                if (dayCounter >= 1000) {
+                    gameState.day++;
+                    dayCounter = 0;
+                    gameState.plants.forEach(p => p.grow());
+                    updateUI();
+                }
+            }
+            
+            // Render
+            const renderStart = performance.now();
+            
+            if (gameState.offscreenCanvas) {
+                renderBackground();
+            } else {
+                ctx.fillStyle = '#f5f5dc';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            
+            gameState.plants.forEach(p => p.render(ctx));
+            
+            const renderTime = performance.now() - renderStart;
+            document.getElementById('renderDisplay').textContent = renderTime.toFixed(2) + 'ms';
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start game
+        updateUI();
+        requestAnimationFrame(gameLoop);
+        showToast('🎮 Bem-vindo ao Vertical Farm Tycoon v2!');
+    </script>
+</body>
+</html>
